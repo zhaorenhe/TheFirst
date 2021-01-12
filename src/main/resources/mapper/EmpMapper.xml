@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--
+    1) namespace 跟接口的全路径一致
+    2)statement的id 和接口 的方法名一致
+    2)statement的resultType 和接口方法的返回值一致
+    4)statement的ParameterType接口方法的参数一致  (可略)
+
+-->
+<mapper namespace="com.itqf.mapper.EmpMapper">
+
+    <!--1.定义sql片段-->
+    <sql id="mysqlcluase">
+      select emp_id as empId,name,age,sex,salary
+        from emp
+    </sql>
+        <!--
+         public Emp findById(int id);
+    public List<Emp> findByAll();
+        -->
+    <select id="findById" resultType="com.itqf.entity.Emp" >
+        <!--
+        2.使用include包含sql片段
+        -->
+        <include refid="mysqlcluase"></include>
+        where emp_id=#{id}
+    </select>
+
+    <select id="findByAll" resultType="com.itqf.entity.Emp" >
+       <include refid="mysqlcluase"></include>
+    </select>
+
+    <!-- public Emp findByCondition(Emp emp);
+      if+where
+       select emp_id as empId,name,age,sex,salary
+        from emp where 1=1  and|or name like ?
+
+    -->
+    <select id="findByCondition" resultType="com.itqf.entity.Emp" >
+       <include refid="mysqlcluase"></include>
+        <where>    <!--1.根据条件是否拼接where  2.去前缀(and|or)-->
+
+            <if test="name!=null and name!=''">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="age!=null">
+               and age=#{age}
+            </if>
+        </where>
+    </select>
+    <select id="findByCondition1" resultType="com.itqf.entity.Emp" >
+        <include refid="mysqlcluase"></include>
+        <trim prefix="WHERE" prefixOverrides="AND|OR">    <!--1.根据条件是否拼接where  2.去前缀(and|or)-->
+
+            <if test="name!=null and name!=''">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="age!=null">
+                and age=#{age}
+            </if>
+        </trim>
+    </select>
+
+
+    <!-- public   int  update(Emp emp);
+      update emp set a=#{a},b=#{b}? where id=1;
+    -->
+    <update id="update">
+        update emp
+        <set> <!--1)拼接set  2)去后缀（,） -->
+            <if test="name!=null and name!=''">
+                name=#{name},
+            </if>
+            <if test="age!=null">
+                age=#{age},
+            </if>
+            <if test="sex!=null and sex!=''">
+                sex=#{sex},
+            </if>
+            <if test="salary!=null ">
+                salary=#{salary},
+            </if>
+
+        </set>
+        where emp_id=#{empId}
+    </update>
+
+    <!-- public   int  update1(Emp emp);
+    update emp set a=#{a},b=#{b}  where id=1;
+  -->
+    <update id="update1">
+        update emp
+        <!--
+        prefix: 前缀
+        suffix：后缀
+        suffixOverrides=","  去后缀
+        prefixOverrides="and|or"  去前缀
+
+       1) prefix="where"   prefixOverrides="AND|OR"
+       2) prefix="set"   suffixOverrides=","
+
+
+        -->
+        <trim prefix="SET" suffixOverrides="," > <!--1)拼接set  2)去后缀（,） -->
+            <if test="name!=null and name!=''">
+                name=#{name},
+            </if>
+            <if test="age!=null">
+                age=#{age},
+            </if>
+            <if test="sex!=null and sex!=''">
+                sex=#{sex},
+            </if>
+            <if test="salary!=null ">
+                salary=#{salary},
+            </if>
+
+        </trim>
+        where emp_id=#{empId}
+    </update>
+
+    <!--
+        // foreach
+    public  List<Emp>  findByIds(List<Integer> ids);
+    select  * from emp where emp_id in (?,?);
+      select  * from emp where emp_id in (?,?,?);
+        select  * from emp where emp_id in (?,?,?,?);
+        for(Emp emp:list){
+            emp.getName();
+        }
+    -->
+    <select id="findByIds" resultType="com.itqf.entity.Emp">
+        <include refid="mysqlcluase"></include>
+        <where>
+            <!--
+            collection=""  集合，list 或者 array
+            open="("  开始字符
+            close=")" 结束字符
+             separator=","  变量之间的分隔符
+            item="id"
+            -->
+            emp_id in
+            <foreach collection="list" open="(" close=")" separator="," item="id" >
+                #{id}
+            </foreach>
+        </where>
+    </select>
+
+    <!--
+        public  List<Emp>  findByPage(@Param("offset") int offset
+            ,@Param("pageSize") int limit);
+    -->
+    <select id="findByPage" resultType="com.itqf.entity.Emp">
+        <include refid="mysqlcluase" ></include>
+        limit #{offset},#{pageSize}
+    </select>
+
+</mapper>

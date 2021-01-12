@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<!--
+  xml约束：http://mybatis.org/dtd/mybatis-3-config.dtd
+        mybatis的配置文件
+        连库
+-->
+<configuration>
+    <!--
+    properties?, settings?, typeAliases?,
+ plugins?, environments?, databaseIdProvider?, mappers
+    -->
+
+    <settings>
+        <!--打印sql语句
+        指定MyBatis的日志实现使用。如果此设置是不存在的记录的实施将自动查找。
+        -->
+        <setting name="logImpl" value="org.apache.ibatis.logging.stdout.StdOutImpl"/>
+    </settings>
+
+    <!--分页插件的第2步：
+      配置插件
+    -->
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor"></plugin>
+    </plugins>
+
+
+    <environments default="development">
+        <environment id="development">
+            <!-- 
+                mybatis控制事务
+            -->
+            <transactionManager type="JDBC"></transactionManager>
+            <!-- 
+               数据源配置
+               type="POOLED"  默认
+                 <property name="driver" value="com.mysql.jdbc.Driver"></property>
+                <property name="url"
+                          value="jdbc:mysql:///Mybatisdb?unicode=true&amp;characterEncoding=utf8"></property>
+                <property name="username" value="root"></property>
+                <property name="password" value="admin"></property>
+
+
+                替换为druid的连接池：
+                驱动的属性名：driverClass
+                连接数据库URL:jdbcUrl
+           -->
+            <dataSource type="com.itqf.factory.MyDruidDataSource">
+                <property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+                <property name="jdbcUrl"
+                          value="jdbc:mysql:///mybatisdb?unicode=true&amp;characterEncoding=utf8"></property>
+                <property name="username" value="root"></property>
+                <property name="password" value="123456"></property>
+            </dataSource>
+        </environment>
+    </environments>
+    <!--
+        指定mybatis的映射文件
+    -->
+    <mappers>
+        <mapper resource="mapper/EmpMapper.xml"></mapper>
+    </mappers>
+
+
+</configuration>
+
